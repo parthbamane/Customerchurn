@@ -2,142 +2,165 @@
 <html>
 <head>
     <title>Customer Churn Prediction</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         html, body {
-            background-color: #007BFF;
-            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            font-family: 'Poppins', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            overflow: hidden;
+            padding: 10px;
+            box-sizing: border-box;
+            overflow-y: auto;
         }
         .container {
             background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
             text-align: left;
-            width: 350px;
+            width: 100%;
+            max-width: 850px;
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .form-group-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
         }
         .form-group {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
+            flex-direction: column;
         }
         .form-group label {
-            flex: 1;
-            font-weight: bold;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #555;
         }
         .form-group input, .form-group select {
-            flex: 1.5;
-            padding: 8px;
+            padding: 12px;
             border: 1px solid #ccc;
-            border-radius: 5px;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: 0.3s;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: #007BFF;
+            outline: none;
+            box-shadow: 0px 0px 5px rgba(0, 123, 255, 0.5);
+        }
+        .second-column {
+            grid-column: 2;
         }
         button {
             width: 100%;
-            padding: 10px;
-            background-color: #0056b3;
+            padding: 14px;
+            background-color: #007BFF;
             color: white;
             font-size: 16px;
             cursor: pointer;
             transition: 0.3s;
-            margin-top: 10px;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-top: 20px;
         }
         button:hover {
-            background-color: #003d80;
+            background-color: #0056b3;
         }
         #result {
             margin-top: 15px;
             font-size: 18px;
             font-weight: bold;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
+            text-align: center;
+            color: #333;
         }
-        .meter {
-            width: 100%;
-            height: 150px;
-            background: url('https://i.imgur.com/8Ka3olE.png') no-repeat center;
-            background-size: contain;
-            position: relative;
-            display: none;
+        @media (max-width: 850px) {
+            .form-group-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
-        .needle {
-            position: absolute;
-            width: 6px;
-            height: 60px;
-            background: red;
-            left: 50%;
-            bottom: 20px;
-            transform-origin: bottom;
-            transform: rotate(-90deg);
-            transition: transform 1s ease-in-out;
+        @media (max-width: 600px) {
+            .container {
+                width: 95%;
+            }
+            .form-group-container {
+                grid-template-columns: repeat(1, 1fr);
+            }
         }
     </style>
 </head>
 <body>
-   <div class="container">
-        <h2>Enter Customer Details</h2>
+    <div class="container">
+        <h2>Customer Churn Prediction</h2>
         <form id="churnForm">
-            <div class="form-group">
-                <label>Year:</label>
-                <input type="text" name="year">
-            </div>
-            <div class="form-group">
-                <label>Gender:</label>
-                <select name="gender">
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Age:</label>
-                <input type="text" name="age">
-            </div>
-            <div class="form-group">
-                <label>Days Subscribed:</label>
-                <input type="text" name="no_of_days_subscribed">
-            </div>
-            <div class="form-group">
-                <label>Multi-Screen (0/1):</label>
-                <input type="text" name="multi_screen">
-            </div>
-            <div class="form-group">
-                <label>Mail Subscribed (0/1):</label>
-                <input type="text" name="mail_subscribed">
-            </div>
-            <div class="form-group">
-                <label>Weekly Minutes Watched:</label>
-                <input type="text" name="weekly_mins_watched">
-            </div>
-            <div class="form-group">
-                <label>Minimum Daily Minutes:</label>
-                <input type="text" name="minimum_daily_mins">
-            </div>
-            <div class="form-group">
-                <label>Maximum Daily Minutes:</label>
-                <input type="text" name="maximum_daily_mins">
-            </div>
-            <div class="form-group">
-                <label>Videos Watched:</label>
-                <input type="text" name="videos_watched">
-            </div>
-            <div class="form-group">
-                <label>Maximum Days Inactive:</label>
-                <input type="text" name="maximum_days_inactive">
-            </div>
-            <div class="form-group">
-                <label>Support Calls:</label>
-                <input type="text" name="customer_support_calls">
-            </div>
-            <div class="form-group">
-                <label>Avg Daily Minutes:</label>
-                <input type="text" name="avg_daily_mins">
+            <div class="form-group-container">
+                <div class="form-group">
+                    <label>Year:</label>
+                    <input type="text" name="year">
+                </div>
+                <div class="form-group">
+                    <label>Gender:</label>
+                    <select name="gender">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Age:</label>
+                    <input type="text" name="age">
+                </div>
+                <div class="form-group">
+                    <label>Days Subscribed:</label>
+                    <input type="text" name="no_of_days_subscribed">
+                </div>
+                <div class="form-group">
+                    <label>Multi-Screen (0/1):</label>
+                    <input type="text" name="multi_screen">
+                </div>
+                <div class="form-group">
+                    <label>Mail Subscribed (0/1):</label>
+                    <input type="text" name="mail_subscribed">
+                </div>
+                <div class="form-group">
+                    <label>Weekly Minutes Watched:</label>
+                    <input type="text" name="weekly_mins_watched">
+                </div>
+                <div class="form-group">
+                    <label>Minimum Daily Minutes:</label>
+                    <input type="text" name="minimum_daily_mins">
+                </div>
+                <div class="form-group">
+                    <label>Maximum Daily Minutes:</label>
+                    <input type="text" name="maximum_daily_mins">
+                </div>
+                <div class="form-group">
+                    <label>Videos Watched:</label>
+                    <input type="text" name="videos_watched">
+                </div>
+                <div class="form-group">
+                    <label>Maximum Days Inactive:</label>
+                    <input type="text" name="maximum_days_inactive">
+                </div>
+                <div class="form-group">
+                    <label>Support Calls:</label>
+                    <input type="text" name="customer_support_calls">
+                </div>
+                <div class="form-group second-column">
+                    <label>Avg Daily Minutes:</label>
+                    <input type="text" name="avg_daily_mins">
+                </div>
             </div>
             <button type="button" onclick="predictChurn()">Predict</button>
         </form>
@@ -155,15 +178,7 @@
             .then(response => response.json())
             .then(data => {
                 let resultElement = document.getElementById("result");
-                let meterElement = document.getElementById("meter");
-                let needleElement = document.getElementById("needle");
-                
-                resultElement.innerHTML = "<strong>Churn:</strong> " + data.churn + ", Probability: " + data.probability;
-                resultElement.style.opacity = "1";
-                
-                meterElement.style.display = "block";
-                let angle = -90 + (data.probability * 180);
-                needleElement.style.transform = `rotate(${angle}deg)`;
+                resultElement.innerHTML = `<strong>Churn:</strong> ${data.churn}, Probability: ${data.probability}`;
             })
             .catch(error => console.error("Error:", error));
         }
