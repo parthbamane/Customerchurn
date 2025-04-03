@@ -6,7 +6,7 @@ import os
 app = Flask(__name__)
 
 # Load trained model and encoder
-model_path = "churn_model.pkl"
+model_path = "random_forest_model.pkl"
 encoder_path = "label_encoder.pkl"
 
 if not os.path.exists(model_path) or not os.path.exists(encoder_path):
