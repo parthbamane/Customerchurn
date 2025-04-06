@@ -16,6 +16,7 @@
             box-sizing: border-box;
             overflow-y: auto;
         }
+
         .container {
             background: white;
             padding: 25px;
@@ -27,26 +28,32 @@
             overflow-y: auto;
             max-height: 90vh;
         }
+
         h2 {
             text-align: center;
             color: #333;
             margin-bottom: 20px;
         }
+
         .form-group-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
         }
+
         .form-group {
             display: flex;
             flex-direction: column;
         }
+
         .form-group label {
             font-weight: 600;
             margin-bottom: 6px;
             color: #555;
         }
-        .form-group input, .form-group select {
+
+        .form-group input,
+        .form-group select {
             padding: 12px;
             border: 1px solid #ccc;
             border-radius: 6px;
@@ -55,14 +62,18 @@
             width: 100%;
             box-sizing: border-box;
         }
-        .form-group input:focus, .form-group select:focus {
+
+        .form-group input:focus,
+        .form-group select:focus {
             border-color: #007BFF;
             outline: none;
             box-shadow: 0px 0px 5px rgba(0, 123, 255, 0.5);
         }
+
         .second-column {
             grid-column: 2;
         }
+
         button {
             width: 100%;
             padding: 14px;
@@ -76,31 +87,57 @@
             font-weight: bold;
             margin-top: 20px;
         }
+
         button:hover {
             background-color: #0056b3;
         }
+
         #result {
-            margin-top: 15px;
+            margin-top: 20px;
             font-size: 18px;
             font-weight: bold;
             text-align: center;
             color: #333;
         }
+
+        #progress-container {
+            width: 100%;
+            background-color: #eee;
+            border-radius: 10px;
+            margin-top: 15px;
+            height: 25px;
+            overflow: hidden;
+        }
+
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            line-height: 25px;
+            font-weight: bold;
+            transition: width 0.6s ease-in-out;
+        }
+
         @media (max-width: 850px) {
             .form-group-container {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
+
         @media (max-width: 600px) {
             .container {
                 width: 95%;
             }
+
             .form-group-container {
                 grid-template-columns: repeat(1, 1fr);
             }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h2>Customer Churn Prediction</h2>
@@ -164,21 +201,42 @@
             </div>
             <button type="button" onclick="predictChurn()">Predict</button>
         </form>
-        <p id="result"></p>
+
+        <div id="result"></div>
+
+        <div id="progress-container">
+            <div id="progress-bar">0%</div>
+        </div>
     </div>
 
     <script>
         function predictChurn() {
             var form = new FormData(document.getElementById("churnForm"));
-            
-            fetch("/predict", { 
-                method: "POST", 
-                body: form 
+
+            fetch("/predict", {
+                method: "POST",
+                body: form
             })
             .then(response => response.json())
             .then(data => {
-                let resultElement = document.getElementById("result");
-                resultElement.innerHTML = `<strong>Churn:</strong> ${data.churn}, Probability: ${data.probability}`;
+                const resultElement = document.getElementById("result");
+                const progressBar = document.getElementById("progress-bar");
+
+                if (data.error) {
+                    resultElement.innerHTML = "Error: " + data.error;
+                    resultElement.style.color = "red";
+                    progressBar.style.width = "0%";
+                    progressBar.innerText = "0%";
+                    progressBar.style.backgroundColor = "#ccc";
+                } else {
+                    resultElement.innerHTML = "Churn: " + data.churn + "<br>Probability: " + data.probability;
+                    resultElement.style.color = data.churn === "Yes" ? "red" : "green";
+
+                    const percent = parseFloat(data.probability);
+                    progressBar.style.width = percent + "%";
+                    progressBar.innerText = percent.toFixed(2) + "%";
+                    progressBar.style.backgroundColor = percent >= 25 ? "#f44336" : "#4CAF50";
+                }
             })
             .catch(error => console.error("Error:", error));
         }
