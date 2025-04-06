@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import joblib
 import numpy as np
 import os
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -26,15 +27,23 @@ def home():
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
-        # Extract form input
+        year = int(request.form["year"])
+        age = int(request.form["age"])
+
+        # Validation
+        current_year = datetime.now().year
+        if age < 18:
+            return jsonify({"error": "Age must be 18 or older."}), 400
+        if year < 2000 or year > current_year:
+            return jsonify({"error": f"Year must be between 2000 and {current_year}."}), 400
+
         gender = request.form["gender"]
         gender_encoded = int(label_encoder.transform([gender])[0])
 
-        # Convert all inputs to numerical format
         data = np.array([
-            int(request.form["year"]),
+            year,
             gender_encoded,
-            int(request.form["age"]),
+            age,
             int(request.form["no_of_days_subscribed"]),
             int(request.form["multi_screen"]),
             int(request.form["mail_subscribed"]),
@@ -47,20 +56,18 @@ def predict():
             float(request.form["avg_daily_mins"])
         ]).reshape(1, -1)
 
-        # Scale the data
+        # Scale data
         data_scaled = scaler.transform(data)
 
-        # Predict churn
+        # Prediction and raw probability
         prediction = int(model.predict(data_scaled)[0])
         probability = model.predict_proba(data_scaled)[0][1] * 100
 
-        # Apply custom threshold (25%) for churn decision
         result = {
-            "churn": "Yes" if probability > 25 else "No",
+            "churn": "Yes" if probability >= 25 else "No",
             "probability": f"{probability:.2f}%"
         }
 
-        # Optional: print for debug
         print("[DEBUG] Prediction:", prediction)
         print("[DEBUG] Probability:", probability)
 
@@ -70,6 +77,7 @@ def predict():
         print("[ERROR]", e)
         return jsonify({"error": str(e)}), 500
 
+
+
 if __name__ == "__main__":
-    # Make the app accessible on the local network
     app.run(debug=True, host="0.0.0.0", port=5001)
