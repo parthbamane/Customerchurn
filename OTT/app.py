@@ -5,15 +5,19 @@ import os
 
 app = Flask(__name__)
 
-# Load trained model and encoder
+# File paths
 model_path = "random_forest_model.pkl"
 encoder_path = "label_encoder.pkl"
+scaler_path = "scaler.pkl"
 
-if not os.path.exists(model_path) or not os.path.exists(encoder_path):
-    raise FileNotFoundError("Trained model or label encoder not found! Run train_model.py first.")
+# Ensure model files exist
+if not os.path.exists(model_path) or not os.path.exists(encoder_path) or not os.path.exists(scaler_path):
+    raise FileNotFoundError("Trained model, scaler, or label encoder not found! Run train_model.py first.")
 
+# Load model, encoder, and scaler
 model = joblib.load(model_path)
 label_encoder = joblib.load(encoder_path)
+scaler = joblib.load(scaler_path)
 
 @app.route("/")
 def home():
@@ -22,11 +26,11 @@ def home():
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
-        # Extract user input
+        # Extract form input
         gender = request.form["gender"]
-        gender_encoded = label_encoder.transform([gender])[0]  # Encode 'Male' or 'Female'
+        gender_encoded = int(label_encoder.transform([gender])[0])
 
-        # Convert input values to the expected format
+        # Convert all inputs to numerical format
         data = np.array([
             int(request.form["year"]),
             gender_encoded,
@@ -41,21 +45,31 @@ def predict():
             int(request.form["maximum_days_inactive"]),
             int(request.form["customer_support_calls"]),
             float(request.form["avg_daily_mins"])
-        ]).reshape(1, -1)  # Reshape for model prediction
+        ]).reshape(1, -1)
 
-        # Make prediction
-        prediction = model.predict(data)[0]
-        probability = model.predict_proba(data)[0][1] * 100  # Get churn probability
+        # Scale the data
+        data_scaled = scaler.transform(data)
 
-        # Prepare response
+        # Predict churn
+        prediction = int(model.predict(data_scaled)[0])
+        probability = model.predict_proba(data_scaled)[0][1] * 100
+
+        # Apply custom threshold (25%) for churn decision
         result = {
-            "churn": "Yes" if prediction == 1 else "No",
+            "churn": "Yes" if probability > 25 else "No",
             "probability": f"{probability:.2f}%"
         }
+
+        # Optional: print for debug
+        print("[DEBUG] Prediction:", prediction)
+        print("[DEBUG] Probability:", probability)
+
         return jsonify(result)
 
     except Exception as e:
-        return jsonify({"error": str(e)})
+        print("[ERROR]", e)
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Make the app accessible on the local network
+    app.run(debug=True, host="0.0.0.0", port=5001)
