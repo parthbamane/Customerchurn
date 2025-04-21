@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Churn Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Customer Churn Prediction</h1>
+        
+        <form method="POST">
+            <div class="form-group">
+                <label for="gender">Gender:</label>
+                <select id="gender" name="gender" required>
+                    <option value="">Select Gender</option>
+                    <option value="male" {% if form_data and form_data.gender == 'male' %}selected{% endif %}>Male</option>
+                    <option value="female" {% if form_data and form_data.gender == 'female' %}selected{% endif %}>Female</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="age">Age:</label>
+                <input type="number" id="age" name="age" required 
+                       value="{{ form_data.age if form_data else '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="no_of_days_subscribed">Days Subscribed:</label>
+                <input type="number" id="no_of_days_subscribed" name="no_of_days_subscribed" required 
+                       value="{{ form_data.no_of_days_subscribed if form_data else '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="multi_screen">Multi-Screen:</label>
+                <select id="multi_screen" name="multi_screen" required>
+                    <option value="">Select Option</option>
+                    <option value="yes" {% if form_data and form_data.multi_screen == 'yes' %}selected{% endif %}>Yes</option>
+                    <option value="no" {% if form_data and form_data.multi_screen == 'no' %}selected{% endif %}>No</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="mail_subscribed">Mail Subscribed:</label>
+                <select id="mail_subscribed" name="mail_subscribed" required>
+                    <option value="">Select Option</option>
+                    <option value="yes" {% if form_data and form_data.mail_subscribed == 'yes' %}selected{% endif %}>Yes</option>
+                    <option value="no" {% if form_data and form_data.mail_subscribed == 'no' %}selected{% endif %}>No</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="weekly_mins_watched">Weekly Minutes Watched:</label>
+                <input type="number" step="0.01" id="weekly_mins_watched" name="weekly_mins_watched" required 
+                       value="{{ form_data.weekly_mins_watched if form_data else '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="minimum_daily_mins">Minimum Daily Minutes:</label>
+                <input type="number" step="0.01" id="minimum_daily_mins" name="minimum_daily_mins" required 
+                       value="{{ form_data.minimum_daily_mins if form_data else '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="maximum_daily_mins">Maximum Daily Minutes:</label>
+                <input type="number" step="0.01" id="maximum_daily_mins" name="maximum_daily_mins" required 
+                       value="{{ form_data.maximum_daily_mins if form_data else '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="videos_watched">Videos Watched:</label>
+                <input type="number" step="0.01" id="videos_watched" name="videos_watched" required 
+                       value="{{ form_data.videos_watched if form_data else '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="maximum_days_inactive">Maximum Days Inactive:</label>
+                <input type="number" step="0.01" id="maximum_days_inactive" name="maximum_days_inactive" required 
+                       value="{{ form_data.maximum_days_inactive if form_data else '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="customer_support_calls">Customer Support Calls:</label>
+                <input type="number" id="customer_support_calls" name="customer_support_calls" required 
+                       value="{{ form_data.customer_support_calls if form_data else '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="avg_daily_mins">Average Daily Minutes:</label>
+                <input type="number" step="0.01" id="avg_daily_mins" name="avg_daily_mins" required 
+                       value="{{ form_data.avg_daily_mins if form_data else '' }}">
+            </div>
+            
+            <button type="submit">Predict Churn</button>
+        </form>
+        
+        {% if show_results %}
+        <div class="results">
+            <h2>Prediction Results</h2>
+
+            <div class="best-model">
+                <h3>Best Model Prediction</h3>
+                <p><strong>Model:</strong> {{ predictions['Best Model'].model_name }}</p>
+                <p><strong>Churn:</strong> {{ predictions['Best Model'].prediction }}</p>
+                <p><strong>Probability:</strong> {{ predictions['Best Model'].probability }}</p>
+            </div>
+
+            <div class="all-models">
+                <h3>All Model Predictions</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>Churn Prediction</th>
+                            <th>Probability</th>
+                            <th>Accuracy</th>
+                            <th>F1 Score</th>
+                            <th>Error %</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for name, pred in predictions.items() if name != 'Best Model' %}
+                        <tr>
+                            <td>{{ name }}</td>
+                            <td>{{ pred.prediction }}</td>
+                            <td>{{ pred.probability }}</td>
+                            <td>{{ accuracies[name] }}</td>
+                            <td>{{ f1_scores[name] }}</td>
+                            <td>{{ error_percentages[name] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
